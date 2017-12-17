@@ -9,28 +9,30 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
   console.log('Connected to MongoDB server');
   const myDb = db.db('TodoApp');
 
-  myDb.collection('Users').find().count().then((count) =>{
-    console.log(`Users count: ${count}`);
-  }, (err) => {
-    console.log(`Unable to fetch count from Todos, ${err}`);
-  });
+  // myDb.collection('Users').find().count().then((count) =>{
+  //   console.log(`Users count: ${count}`);
+  // }, (err) => {
+  //   console.log(`Unable to fetch count from Todos, ${err}`);
+  // });
   //
   var collection = myDb.collection('Users');
-  collection.find({name: 'Dasa'}).toArray().then((doc) =>{
+  collection.find({name: 'someName', location: 'Apex'}).toArray().then((doc) =>{
+    //console.log(`Users count: ${count}`);
     console.log(JSON.stringify(doc, undefined, 2));
+    // console.log(doc.length);
   }, (err) => {
     console.log(`Unable to fetch count from Users, ${err}`);
   });
 
-  collection.find({
-              _id: new ObjectID('5a32eef3283e0942b78ae668')
-            })
-      .toArray()
-      .then((doc) =>{
-        console.log(JSON.stringify(doc, undefined, 2));
-      }, (err) => {
-            console.log(`Unable to fetch count from Users, ${err}`);
-          });
+  // collection.find({
+  //             _id: new ObjectID('5a32eef3283e0942b78ae668')
+  //           })
+  //     .toArray()
+  //     .then((doc) =>{
+  //       console.log(JSON.stringify(doc, undefined, 2));
+  //     }, (err) => {
+  //           console.log(`Unable to fetch count from Users, ${err}`);
+  //         });
 
   db.close();
 });
