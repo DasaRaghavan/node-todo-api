@@ -5,16 +5,19 @@ const {app} = require ('./../server');
 const {Todo} = require('./../../models/Todos');
 var count;
 
-beforeEach((done) => {
-    // Todo.find({}).then((todos) => {
-    //   console.log(JSON.stringify(todos, undefined, 2));
-    //   done();
-    // }, (err) => {
-    //   console.log(err);
-    //   done();
-    // });
+const todos = [{
+  text: 'Something to do 1'
+}, {
+  text: 'Something to do 2'
+}, {
+  text: 'Something to do 3'
+}
+]
 
-    Todo.remove({}).then(() => done());
+beforeEach((done) => {
+    Todo.remove({}).then(() => {
+      return Todo.insertMany(todos);
+    }).then(() => done());
 });
 
 describe('POST Todos', () => {
@@ -33,7 +36,7 @@ describe('POST Todos', () => {
           return done(err);
         }
 
-        Todo.find().then((todos) => {
+        Todo.find({text}).then((todos) => {
           expect(todos.length).toBe(1);
           expect(todos[0].text).toBe(text);
           done();
@@ -56,13 +59,24 @@ describe('POST Todos', () => {
         }
 
         Todo.find().then((todos) => {
-          expect(todos.length).toBe(0);
+          expect(todos.length).toBe(todos.length);
           //expect(todos[0].text).toBe(text);
           done();
         }).catch((e) => done(e));
       })
   });
 
+});
 
+describe('GET /todos', () => {
+  it('should get all todos', () => {
+    request(app)
+      .get('/todos')
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todos.length).toBe(todos.length)
+      })
+      .end(() => done())
+  });
 
 });
