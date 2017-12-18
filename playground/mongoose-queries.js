@@ -6,6 +6,7 @@ const {User} = require('./../models/Users');
 
 var id = '5a3733b764d4cb484a0d8cb1';
 
+
 // User.find({
 //   _id: id
 // }).then((User) => {
@@ -21,12 +22,15 @@ var id = '5a3733b764d4cb484a0d8cb1';
 // }, (e) =>{
 //   console.log(e);
 // });
-
-User.findById(id).then((User) => {
-  if(!User) {
-    return console.log('Unable to find user');
-  }
-  return console.log(JSON.stringify(User, undefined, 2));
-}, (e) =>{
-  console.log(e);
-});
+if(!ObjectID.isValid(id)) {
+  console.log('Invalid ID');
+} else {
+  User.findById(id).then((User) => {
+    if (!User) {
+      return console.log('User not found');
+    }
+    console.log(JSON.stringify(User, undefined, 2));
+  }, (e) =>{
+    console.log(e);
+  });
+}
