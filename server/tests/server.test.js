@@ -3,9 +3,18 @@ const request = require('supertest');
 
 const {app} = require ('./../server');
 const {Todo} = require('./../../models/Todos');
+var count;
 
 beforeEach((done) => {
-  Todo.remove({}).then(() => done());
+    // Todo.find({}).then((todos) => {
+    //   console.log(JSON.stringify(todos, undefined, 2));
+    //   done();
+    // }, (err) => {
+    //   console.log(err);
+    //   done();
+    // });
+
+    Todo.remove({}).then(() => done());
 });
 
 describe('POST Todos', () => {
