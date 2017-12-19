@@ -8,13 +8,19 @@ var count;
 
 const todos = [{
   _id: new ObjectID(),
-  text: 'Something to do 1'
+  text: 'Something to do 1',
+  completed: true
 }, {
   _id: new ObjectID(),
   text: 'Something to do 2'
 }, {
   _id: new ObjectID(),
-  text: 'Something to do 3'
+  text: 'Something to do 3',
+  completed: true
+}, {
+  _id: new ObjectID(),
+  text: 'Something to do 4',
+  completed: false
 }
 ]
 
@@ -149,3 +155,50 @@ describe('remove by /todos/:id', () => {
       .end(()=>done());
   });
 });
+
+describe('update by todo/:id', () => {
+  it('should patch a todo based on an id', (done) => {
+
+    var hexID = (todos[2]._id.toHexString());
+    var text = 'This is the new text';
+
+    request(app)
+      .patch(`/todos/${hexID}`)
+      .send({
+        completed: true,
+        text
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(text);
+        expect(res.body.todo.completed).toBe(true);
+        //expect(res.body.todo.completedAt).toBeA('number');
+        expect(typeof(res.body.todo.completedAt)).toEqual('number');
+      })
+      .end(done);
+    });
+
+      it('should clear completedAt when completed is not true', (done) => {
+        var hexID = (todos[3]._id.toHexString());
+        var text = 'This is the new text to see completedAt changed to null';
+
+        request(app)
+          .patch(`/todos/${hexID}`)
+          .send({
+            completed: false,
+            text
+          })
+          .expect(200)
+          .expect((res) => {
+            // console.log(res.body.todo.text);
+            expect(res.body.todo.text).toBe(text);
+            // console.log(res.body.todo.completed);
+            expect(res.body.todo.completed).toBe(false);
+            // console.log(res.body.todo.completedAt);
+            expect(res.body.todo.completedAt).toBe(null);
+          })
+          .end(done);
+      });
+
+
+  });
