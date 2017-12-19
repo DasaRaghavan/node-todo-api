@@ -8,6 +8,7 @@ var {Todo} = require('../models/Todos');
 var {User} = require('../models/Users');
 
 var app = express();
+const port = process.env.PORT || 3000;
 
 //set up the middle-ware
 app.use(bodyParser.json());
@@ -50,7 +51,7 @@ app.get('/todos/:id', (req, res) => {
 })
 
 app.listen(3000 , () => {
-  console.log('Server started on port 3000');
+  console.log(`Server started on ${port}`);
 });
 
 module.exports = {
