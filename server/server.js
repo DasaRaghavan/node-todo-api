@@ -108,10 +108,9 @@ app.post('/users', (req, res) => {
     //res.header('x-auth',token).send({email: myNewuser.email, password: myNewuser.password});
     res.header('x-auth',token).send(myNewuser);
   }).catch((e) => {
-    res.send(e);
+    res.status(401).send();
   })
 });
-
 
 
 app.get('/users/me', authenticate, (req, res) => {

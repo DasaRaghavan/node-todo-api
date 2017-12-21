@@ -51,4 +51,4 @@ const jwt = require('jsonwebtoken');
     }).then(() => done());
   };
 
-  module.exports = {todos, populateTodos, populateUsers};
+  module.exports = {todos, populateTodos, users, populateUsers};

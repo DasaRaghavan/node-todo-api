@@ -4,7 +4,8 @@ const {ObjectID} =  require('mongodb');
 
 const {app} = require ('./../server');
 const {Todo} = require('./../../models/Todos');
-const {todos, populateTodos, populateUsers} = require('./seed/seed');
+const {User} = require('./../../models/Users');
+const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
 var count;
 
 beforeEach(populateTodos);
@@ -180,5 +181,95 @@ describe('update by todo/:id', () => {
           .end(done);
       });
 
+});
+
+describe('test for /users/me', () => {
+  it('should return the user for authenticated users', (done) => {
+
+    request(app)
+      .get('/users/me')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .expect(res => {
+        expect(res.body._id).toBe((users[0]._id).toHexString());
+        expect(res.body.email).toBe(users[0].email);
+      })
+      .end(done);
+  });
+
+  it('should NOT return the user for unauthenticated users', (done) => {
+
+    request(app)
+      .get('/users/me')
+      // .set('x-auth', users[1].tokens[1].token)
+      .expect(401)
+      .expect(res => {
+        expect(res.body.name).toBe('JsonWebTokenError');
+        expect(res.body.message).toBe('jwt must be provided');
+      })
+      .end(done);
+  });
+
+});
+
+
+  describe(' POST /users', () => {
+    it('should create the user', (done) => {
+      var email = 'dasaTest1@example.com';
+      var password = '123mnb';
+
+      request(app)
+        .post('/users')
+        .send({email, password})
+        .expect(200)
+        .expect((res) => {
+          expect(res.headers['x-auth']).toBeTruthy();
+          expect(res.body._id).toBeTruthy();
+          expect(res.body.email).toBe(email);
+        })
+        .end((err) => {
+          if (err) {
+            return done(err);
+          }
+          User.findOne({email}).then((user) => {
+            // expect(user).toBeTruthy();
+            expect(user.email).toBe(email);
+            expect(user.password).not.toBe(password);
+            done();
+          });
+        });
+      })
+
+  it('should result in a validation error, when email format or password length is incorrect', (done) => {
+      var email = 'dasaTest1example.com';
+      var password = '123mnb';
+
+      request(app)
+        .post('/users')
+        .send({email, password})
+        .expect(401)
+        .expect((res) => {
+          // expect(res.headers['x-auth']).toBeTruthy();
+          expect(res.body.errors).toBeUndefined();
+          expect(res.body.name).toBeUndefined();
+        })
+        .end(done);
+      });
+
+  it('should not create the user if email is duplicated', (done) => {
+    var email = users[0].email;
+    var password = '123mnb';
+
+    request(app)
+      .post('/users')
+      .send({email, password})
+      .expect(401)
+      .expect((res) => {
+        // expect(res.headers['x-auth']).toBeTruthy();
+        expect(res.body.errors).toBeUndefined();
+        expect(res.body.name).toBeUndefined();
+      })
+      .end(done);
+    });
 
   });
