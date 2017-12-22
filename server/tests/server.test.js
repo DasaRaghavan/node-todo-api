@@ -6,7 +6,7 @@ const {app} = require ('./../server');
 const {Todo} = require('./../../models/Todos');
 const {User} = require('./../../models/Users');
 const {todos, populateTodos, users, populateUsers} = require('./seed/seed');
-var count;
+var authToken;
 
 beforeEach(populateTodos);
 beforeEach(populateUsers);
@@ -240,8 +240,24 @@ describe('test for /users/me', () => {
         });
       })
 
-  it('should result in a validation error, when email format or password length is incorrect', (done) => {
-      var email = 'dasaTest1example.com';
+    it('should result in a validation error, when email format or password length is incorrect', (done) => {
+        var email = 'dasaTest1example.com';
+        var password = '123mnb';
+
+        request(app)
+          .post('/users')
+          .send({email, password})
+          .expect(401)
+          .expect((res) => {
+            // expect(res.headers['x-auth']).toBeTruthy();
+            expect(res.body.errors).toBeUndefined();
+            expect(res.body.name).toBeUndefined();
+          })
+          .end(done);
+        });
+
+    it('should not create the user if email is duplicated', (done) => {
+      var email = users[0].email;
       var password = '123mnb';
 
       request(app)
@@ -256,20 +272,54 @@ describe('test for /users/me', () => {
         .end(done);
       });
 
-  it('should not create the user if email is duplicated', (done) => {
-    var email = users[0].email;
-    var password = '123mnb';
+  });
 
-    request(app)
-      .post('/users')
-      .send({email, password})
-      .expect(401)
-      .expect((res) => {
-        // expect(res.headers['x-auth']).toBeTruthy();
-        expect(res.body.errors).toBeUndefined();
-        expect(res.body.name).toBeUndefined();
-      })
-      .end(done);
+
+  describe('POST /users/login', () => {
+  //
+    it('should generate a new auth token for an existing user', (done) => {
+      var email = users[0].email;
+      var password = users[0].password;
+
+      request(app)
+        .post('/users/login')
+        .send({email, password})
+        .expect(200)
+        .expect((res) => {
+          expect(res.body._id).toBeTruthy();
+          expect(res.body.email).toBe(users[0].email);
+          expect(res.headers['x-auth']).toBeTruthy();
+          // console.log(res.headers['x-auth']);
+          var hexID = (res.body._id);
+          User.findOne(ObjectID(hexID)).then((user)=>{
+            //console.log(user.tokens[1].token);
+            expect(user.tokens[1].token).toBe(res.headers['x-auth']);
+          });
+          })
+        .end(done);
     });
+  //
+  //
+    it('should return a 401 status for a user that does not exist', (done) => {
+      var email = 'emailDoesNotExist@example.com';
+      var password = users[0].password;
 
+      request(app)
+        .post('/users/login')
+        .send({email, password})
+        .expect(400)
+        .end(done);
+    });
+  //
+    it('should return a 401 status for a user that supplies an incorrect password', (done) => {
+      var email = users[0].email;
+      var password = "incorrectPassword";
+
+      request(app)
+        .post('/users/login')
+        .send({email, password})
+        .expect(400)
+        .end(done);
+    });
+  //
   });

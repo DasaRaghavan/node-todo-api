@@ -92,7 +92,7 @@ const bcrypt = require('bcryptjs');
       return new Promise((resolve, reject) => {
         bcrypt.compare(password, user.password, (err, res) => {
           if(res){
-            console.log(res);
+            // console.log(res);
               resolve(user);
           } else {
               reject();
