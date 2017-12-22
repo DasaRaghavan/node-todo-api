@@ -36,7 +36,7 @@ app.get('/todos', (req, res) => {
 });
 
 app.get('/todos/:id', (req, res) => {
-  console.log("IM here inside get");
+  // console.log("IM here inside get");
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)){
@@ -112,6 +112,37 @@ app.post('/users', (req, res) => {
   })
 });
 
+//TL;DR
+
+app.post('/users/login', (req,res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  // res.send(body); << this works >>
+
+  // As a user, when I login from a new device and provide my
+  // user id and valid password, a new auth token must be generated
+
+
+  // receive user id
+  // check if user id exists
+  // compare password supplied and encrypted password in collection
+  // if the comparison succeeds, return the jsonwebtoken as an auth on the headers
+  // if comparison fails, return error
+
+  // create a model method on Users.js to perform the tasks listed above
+  // pass the credentials to the method and get the promise as a response
+  User.findByCredentials(body.email, body.password).then((user) => {
+
+    //generate a new authentication token for the device
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    }).catch((e)=>res.send(e));
+
+  }).catch((e)=>{
+    res.status(400).send(e)
+  });
+
+});
+//TL;DR
 
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
