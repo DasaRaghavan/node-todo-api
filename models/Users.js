@@ -65,6 +65,16 @@ const bcrypt = require('bcryptjs');
     });
   }
 
+  UserSchema.methods.removeToken = function(token) {
+    var user = this;
+    // use the $pull operator of the update method to remove the token
+    return user.update({
+      $pull: {
+        tokens: {token}
+    }});
+
+  };
+
   UserSchema.statics.findByToken = function(token) {
     var User = this;
     var decoded;
@@ -124,3 +134,7 @@ var User = mongoose.model('User', UserSchema);
 module.exports = {
   User
 }
+
+
+/// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YTNlZmZkYjcxNTcxMTMyMDUwNGI2YTEiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTE0MDc4Nzc0fQ.1e3_rfv67D8UfVKaWaHJ7nvD64xFJrBLh6Zxi6ALO-s
+/// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YTNlZmZkYjcxNTcxMTMyMDUwNGI2YTEiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNTE0MDc4ODQ0fQ.cNceFwmaIADvezKs7S2XoQcb7jFG0EltMvi4-d652Hk

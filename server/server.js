@@ -112,7 +112,7 @@ app.post('/users', (req, res) => {
   })
 });
 
-//TL;DR
+
 
 app.post('/users/login', (req,res) => {
   var body = _.pick(req.body, ['email', 'password']);
@@ -142,11 +142,28 @@ app.post('/users/login', (req,res) => {
   });
 
 });
-//TL;DR
 
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
-})
+});
+
+// users logout: remove token from tokens array for the users
+
+// create a PRIVATE (i.e., authenticated user) route with delete
+// by calling authenticate in middleware.
+// Calling authenticate will modify the req object to include the token
+
+app.delete('/users/me/token', authenticate, (req,res) => {
+
+  // console.log(req); << worked. req now contains the token >>
+  // create an instance method 'removeToken' in Users.js
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.send();
+  });
+
+});
 
 app.listen(port , () => {
   console.log(`Server started on ${port}`);
