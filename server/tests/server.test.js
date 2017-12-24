@@ -17,6 +17,7 @@ describe('POST Todos', () => {
 
     request(app)
       .post('/todos')
+      .set('x-auth', users[0].tokens[0].token)
       .send({text})
       .expect(200)
       .expect((res) => {
@@ -39,6 +40,7 @@ describe('POST Todos', () => {
 
     request(app)
       .post('/todos')
+      .set('x-auth', users[0].tokens[0].token)
       .send({})
       .expect(400)
       // .expect((res) => {
@@ -63,6 +65,7 @@ describe('GET /todos', () => {
   it('should get all todos', (done) => {
     request(app)
       .get('/todos')
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .expect((res) => {
         expect(res.body.todos.length).toBe(todos.length)
@@ -76,6 +79,7 @@ describe('/todos/ids', () => {
   it('should get a doc todo', (done) => {
     request(app)
       .get(`todos/${todos[0]._id.toHexString()}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .expect((res) => {
         expect(res.body.todos.text).toBe(todos[0].text)
@@ -87,6 +91,7 @@ describe('/todos/ids', () => {
     var hexId = new ObjectID().toHexString();
     request(app)
       .get(`todos/${hexId}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(()=>done());
   });
@@ -94,6 +99,7 @@ describe('/todos/ids', () => {
   it('should return a 404 for non-object ID', (done) => {
     request(app)
       .get(`todos/123`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(()=>done());
   });
@@ -103,9 +109,10 @@ describe('/todos/ids', () => {
 describe('remove by /todos/:id', () => {
   it('should remove todo by id', (done) => {
     // console.log(todos[1]._id.toHexString());
-    var hexID = (todos[1]._id.toHexString());
+    var hexID = (todos[0]._id.toHexString());
     request(app)
       .delete(`/todos/${hexID}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(200)
       .expect((res) => {
         expect(res.body.todo._id).toBe(hexID);
@@ -125,6 +132,7 @@ describe('remove by /todos/:id', () => {
     var hexId = new ObjectID().toHexString();
     request(app)
       .delete(`todos/${hexId}`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(()=>done());
   });
@@ -132,6 +140,7 @@ describe('remove by /todos/:id', () => {
   it('should return a 404 for non-object ID', (done) => {
     request(app)
       .delete(`todos/123`)
+      .set('x-auth', users[0].tokens[0].token)
       .expect(404)
       .end(()=>done());
   });
@@ -140,11 +149,12 @@ describe('remove by /todos/:id', () => {
 describe('update by todo/:id', () => {
   it('should patch a todo based on an id', (done) => {
 
-    var hexID = (todos[2]._id.toHexString());
+    var hexID = (todos[0]._id.toHexString());
     var text = 'This is the new text';
 
     request(app)
       .patch(`/todos/${hexID}`)
+      .set('x-auth', users[0].tokens[0].token)
       .send({
         completed: true,
         text
@@ -160,11 +170,12 @@ describe('update by todo/:id', () => {
     });
 
       it('should clear completedAt when completed is not true', (done) => {
-        var hexID = (todos[3]._id.toHexString());
+        var hexID = (todos[0]._id.toHexString());
         var text = 'This is the new text to see completedAt changed to null';
 
         request(app)
           .patch(`/todos/${hexID}`)
+          .set('x-auth', users[0].tokens[0].token)
           .send({
             completed: false,
             text

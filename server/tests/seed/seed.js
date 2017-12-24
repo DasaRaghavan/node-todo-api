@@ -3,25 +3,20 @@ const {ObjectID} = require('mongodb');
 const {User} = require('./../../../models/Users');
 const jwt = require('jsonwebtoken');
 
+const userOneID = new ObjectID();
+const userTwoID = new ObjectID();
+
   const todos = [{
     _id: new ObjectID(),
     text: 'Something to do 1',
-    completed: true
+    completed: true,
+    _createdBy: userOneID
   }, {
     _id: new ObjectID(),
-    text: 'Something to do 2'
-  }, {
-    _id: new ObjectID(),
-    text: 'Something to do 3',
-    completed: true
-  }, {
-    _id: new ObjectID(),
-    text: 'Something to do 4',
-    completed: false
+    text: 'Something to do 2',
+    _createdBy: userTwoID
   }
   ]
-  const userOneID = new ObjectID();
-  const userTwoID = new ObjectID();
 
   const users = [{
     _id: userOneID,
