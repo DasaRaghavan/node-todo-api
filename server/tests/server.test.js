@@ -323,3 +323,37 @@ describe('test for /users/me', () => {
     });
   //
   });
+
+  describe('DELETE /users/me/token', () => {
+    it('should remove the token from the tokens array', (done) => {
+      var email = users[0].email;
+      var token = users[0].tokens[0].token;
+      request(app)
+        .delete('/users/me/token')
+        .set('x-auth', users[0].tokens[0].token)
+        .expect(200)
+        .end((err, res)=>{
+          if(err){
+            return done(err);
+          }
+          User.findOne({email: email}).then((users) => {
+            //console.log(users);
+            expect(users.tokens.length).toBe(0);
+            done();
+          }).catch((e) => {
+            console.log('Error', e);
+          });
+
+        });
+      });
+
+    it('should return an error for an unauthenticated token', (done) => {
+        var email = users[0].email;
+        var token = users[0].tokens[0].token;
+        request(app)
+          .delete('/users/me/token')
+          .set('x-auth', 'abcd')//users[0].tokens[0].token)
+          .expect(401)
+          .end(done)
+    });
+  });
