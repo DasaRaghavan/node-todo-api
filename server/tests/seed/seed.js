@@ -24,7 +24,7 @@ const userTwoID = new ObjectID();
     password: 'useronepass',
     tokens: [{
       access: 'auth',
-      token: jwt.sign({_id: userOneID.toHexString(), access: 'auth'}, 'abc123').toString()
+      token: jwt.sign({_id: userOneID.toHexString(), access: 'auth'}, process.env.JWT_SECRET).toString()
     }]
   }, {
     _id: userTwoID,
