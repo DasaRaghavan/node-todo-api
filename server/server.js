@@ -57,24 +57,47 @@ app.get('/todos/:id', authenticate, (req, res) => {
 
 });
 
-app.delete('/todos/:id', authenticate, (req, res) => {
+// app.delete('/todos/:id', authenticate, (req, res) => {
+//   var id = req.params.id;
+//
+//   if(!ObjectID.isValid(id)){
+//     return res.status(404).send();
+//   }
+//
+//   Todo.findByIdAndRemove(id).then((todo) => {
+//     if(!todo) {
+//       return res.status(404).send('Todo not found1');
+//     } else if (todo._createdBy.toString() != req.user._id.toString()){
+//         return res.status(404).send('Todo not found2');
+//     }
+//     res.send({todo});
+//   }, (e) => {
+//     res.status(400).send();
+//   });
+// });
+
+// ***** with async/await
+app.delete('/todos/:id', authenticate, async (req, res) => {
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)){
     return res.status(404).send();
   }
 
-  Todo.findByIdAndRemove(id).then((todo) => {
-    if(!todo) {
-      return res.status(404).send('Todo not found1');
-    } else if (todo._createdBy.toString() != req.user._id.toString()){
-        return res.status(404).send('Todo not found2');
-    }
-    res.send({todo});
-  }, (e) => {
+  try {
+    const todo = await Todo.findByIdAndRemove(id);
+      if(!todo) {
+        return res.status(404).send('Todo not found1');
+      } else if (todo._createdBy.toString() != req.user._id.toString()){
+          return res.status(404).send('Todo not found2');
+      }
+      res.send({todo});
+  } catch(e) {
     res.status(400).send();
-  });
+  }
 });
+
+
 
 app.patch('/todos/:id', authenticate, (req, res) => {
   var id = req.params.id;
@@ -108,23 +131,66 @@ app.patch('/todos/:id', authenticate, (req, res) => {
 //user.generateAuthToken
 
 
-app.post('/users', (req, res) => {
+// app.post('/users', (req, res) => {
+//   var body = _.pick(req.body, ['email', 'password'])
+//   var myNewuser = new User(body);
+//
+//   myNewuser.save().then(() => {
+//     return myNewuser.generateAuthToken();
+//   }).then((token)=>{
+//     //res.header('x-auth',token).send({email: myNewuser.email, password: myNewuser.password});
+//     res.header('x-auth',token).send(myNewuser);
+//   }).catch((e) => {
+//     res.status(401).send();
+//   })
+// });
+
+//with async/await
+app.post('/users', async (req, res) => {
   var body = _.pick(req.body, ['email', 'password'])
   var myNewuser = new User(body);
-
-  myNewuser.save().then(() => {
-    return myNewuser.generateAuthToken();
-  }).then((token)=>{
-    //res.header('x-auth',token).send({email: myNewuser.email, password: myNewuser.password});
-    res.header('x-auth',token).send(myNewuser);
-  }).catch((e) => {
-    res.status(401).send();
-  })
+  try {
+    await myNewuser.save();
+    const token = await myNewuser.generateAuthToken();
+    return res.header('x-auth',token).send(myNewuser);
+  } catch (e) {
+      res.status(401).send();
+  }
 });
 
 
 
-app.post('/users/login', (req,res) => {
+// app.post('/users/login', (req,res) => {
+//   var body = _.pick(req.body, ['email', 'password']);
+//   // res.send(body); << this works >>
+//
+//   // As a user, when I login from a new device and provide my
+//   // user id and valid password, a new auth token must be generated
+//
+//
+//   // receive user id
+//   // check if user id exists
+//   // compare password supplied and encrypted password in collection
+//   // if the comparison succeeds, return the jsonwebtoken as an auth on the headers
+//   // if comparison fails, return error
+//
+//   // create a model method on Users.js to perform the tasks listed above
+//   // pass the credentials to the method and get the promise as a response
+//   User.findByCredentials(body.email, body.password).then((user) => {
+//
+//     //generate a new authentication token for the device
+//     return user.generateAuthToken().then((token) => {
+//       res.header('x-auth', token).send(user);
+//     }).catch((e)=>res.send(e));
+//
+//   }).catch((e)=>{
+//     res.status(400).send(e)
+//   });
+//
+// });
+
+//with async/await
+app.post('/users/login', async (req,res) => {
   var body = _.pick(req.body, ['email', 'password']);
   // res.send(body); << this works >>
 
@@ -140,18 +206,18 @@ app.post('/users/login', (req,res) => {
 
   // create a model method on Users.js to perform the tasks listed above
   // pass the credentials to the method and get the promise as a response
-  User.findByCredentials(body.email, body.password).then((user) => {
 
-    //generate a new authentication token for the device
-    return user.generateAuthToken().then((token) => {
-      res.header('x-auth', token).send(user);
-    }).catch((e)=>res.send(e));
-
-  }).catch((e)=>{
+  try {
+    const user = await User.findByCredentials(body.email, body.password);
+    const token = await user.generateAuthToken();
+    return res.header('x-auth', token).send(user);
+  } catch (e) {
     res.status(400).send(e)
-  });
-
+  }
 });
+
+
+
 
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
@@ -163,16 +229,29 @@ app.get('/users/me', authenticate, (req, res) => {
 // by calling authenticate in middleware.
 // Calling authenticate will modify the req object to include the token
 
-app.delete('/users/me/token', authenticate, (req,res) => {
+// app.delete('/users/me/token', authenticate, (req,res) => {
+//
+//   // console.log(req); << worked. req now contains the token >>
+//   // create an instance method 'removeToken' in Users.js
+//   req.user.removeToken(req.token).then(() => {
+//     res.status(200).send();
+//   }, () => {
+//     res.send();
+//   });
+//
+// });
+
+// with async/await
+app.delete('/users/me/token', authenticate, async (req,res) => {
 
   // console.log(req); << worked. req now contains the token >>
   // create an instance method 'removeToken' in Users.js
-  req.user.removeToken(req.token).then(() => {
-    res.status(200).send();
-  }, () => {
-    res.send();
-  });
-
+  try {
+    await req.user.removeToken(req.token)
+    return res.status(200).send();
+  } catch (e) {
+      res.send();
+  }
 });
 
 app.listen(port , () => {

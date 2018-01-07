@@ -51,7 +51,21 @@ const bcrypt = require('bcryptjs');
   // the arrow function is not used here.
   // arrow functions do not bind the "this" keyword to a variable
 
-  UserSchema.methods.generateAuthToken = function() {
+  // UserSchema.methods.generateAuthToken = function() {
+  //   var user = this; // the this keyword stores the MongoDB user document
+  //   var access = 'auth';
+  //   var token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
+  //
+  //   // user.tokens = user.tokens.concat({access, token});
+  //   // << see comment on usePushEach >>
+  //   user.tokens.push({access, token});
+  //
+  //   return user.save().then(() => {
+  //     return token;
+  //   });
+  // }
+
+  UserSchema.methods.generateAuthToken = async function() {
     var user = this; // the this keyword stores the MongoDB user document
     var access = 'auth';
     var token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
@@ -60,9 +74,8 @@ const bcrypt = require('bcryptjs');
     // << see comment on usePushEach >>
     user.tokens.push({access, token});
 
-    return user.save().then(() => {
-      return token;
-    });
+    await user.save()
+    return token;
   }
 
   UserSchema.methods.removeToken = function(token) {
